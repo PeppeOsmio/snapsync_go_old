@@ -21,31 +21,30 @@ func HumanReadableSize(bytes int64) string {
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
 
-func GetInfoFromSnapshotBasePath(snapshotPath string) (snapshotInfo *structs.SnapshotInfo, err error) {
+func GetInfoFromSnapshotBasePath(snapshotPath string) (snapshotName string, interval string, number int, err error) {
 	items := strings.Split(snapshotPath, ".")
 	if len(items) != 3 {
-		return nil, fmt.Errorf("snapshot name must be in format <name>.<interval>.<number>")
+		return snapshotName, interval, number, fmt.Errorf("snapshot name must be in format <name>.<interval>.<number>")
 	}
-	name := items[0]
-	interval := items[1]
-	number, err := strconv.Atoi(items[2])
+	snapshotName = items[0]
+	interval = items[1]
+	number, err = strconv.Atoi(items[2])
 	if err != nil {
-		return nil, fmt.Errorf("can't parse snapshot number: %s", snapshotPath)
+		return snapshotName, interval, number, fmt.Errorf("can't parse snapshot number: %s", snapshotPath)
+	}
+	return snapshotName, interval, number, nil
+}
+
+func GetInfoFromSnapshotPath(snapshotAbspath string) (snapshotInfo *structs.SnapshotInfo, err error) {
+	snapshotDirName := strings.TrimSuffix(path.Base(snapshotAbspath), "/")
+	name, interval, number, err := GetInfoFromSnapshotBasePath(snapshotDirName)
+	if err != nil {
+		return nil, err
 	}
 	return &structs.SnapshotInfo{
-		Abspath:      "",
+		Abspath:      snapshotAbspath,
 		SnapshotName: name,
 		Interval:     interval,
 		Number:       number,
 	}, nil
-}
-
-func GetInfoFromSnapshotPath(snapshotPath string) (snapshotInfo *structs.SnapshotInfo, err error) {
-	snapshotDirName := strings.TrimSuffix(path.Base(snapshotPath), "/")
-	snapshotInfo, err = GetInfoFromSnapshotBasePath(snapshotDirName)
-	if err != nil {
-		return nil, err
-	}
-	snapshotInfo.Abspath = snapshotPath
-	return snapshotInfo, nil
 }
