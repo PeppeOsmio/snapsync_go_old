@@ -1,0 +1,13 @@
+snapshot_name: test
+dirs:
+  - src_dir_abspath: /home/peppeosmio/snapsync_old/test
+    dst_dir_in_snapshot: test
+snapshots_dir: ./ss/test
+interval: daily
+retention: 7
+always_run_post_snapshot_commands: true
+cron: "* * * * *"
+pre_snapshot_commands:
+  - "touch /home/peppeosmio/snapsync_old/dioporico"
+post_snapshot_commands:
+  - "echo \"dio bastardooo\" > /home/peppeosmio/snapsync_old/dioporico"
