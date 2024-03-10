@@ -1,0 +1,8 @@
+services:
+  snapsync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /:/hostfs
+      - $SNAPSYNC_CONFIGS_DIR:/snapsync/configs

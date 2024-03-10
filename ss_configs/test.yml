@@ -1,8 +1,8 @@
 snapshot_name: test
 dirs:
-  - src_dir_abspath: /home/peppeosmio/snapsync/test
+  - src_dir_abspath: /hostfs/home/peppeosmio/snapsync/test
     dst_dir_in_snapshot: test
-snapshots_dir: ./ss/test
+snapshots_dir: /hostfs/home/peppeosmio/snapsync/ss
 interval: daily
 retention: 7
 always_run_post_snapshot_commands: true
