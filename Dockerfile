@@ -1,14 +1,14 @@
-FROM golang:1.22 as build
+FROM golang:1.22.1-alpine3.19 as build
 
 COPY . /snapsync
 WORKDIR /snapsync
 
 RUN go build -o snapsync main.go
 
-FROM alpine:3.19.1
+FROM alpine:3.19
 
-COPY --from=build /snapsync/snapsync /snapsync
-COPY --from=build /snapsync/entrypoint.sh /entrypoint.sh
+COPY --from=build /snapsync/snapsync /snapsync/snapsync
+COPY --from=build /snapsync/entrypoint.sh /snapsync/entrypoint.sh
 
 WORKDIR /snapsync
 

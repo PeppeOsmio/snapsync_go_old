@@ -36,7 +36,7 @@ var restoreCmd = &cobra.Command{
 
 		snapshotToRestore := args[0]
 
-		snapshotName, interval, number, err := utils.GetInfoFromSnapshotBasePath(snapshotToRestore)
+		snapshotName, number, err := utils.GetInfoFromSnapshotBasePath(snapshotToRestore)
 		if err != nil {
 			slog.Error(fmt.Sprintf("can't get snapshot info: %s", err.Error()))
 			return
@@ -48,7 +48,7 @@ var restoreCmd = &cobra.Command{
 			return
 		}
 
-		err = snapshots.RestoreSnapshot(config, interval, number, snapshotConfig)
+		err = snapshots.RestoreSnapshot(config, number, snapshotConfig)
 		if err != nil {
 			slog.Error("an error occurred while restoring the snapshot: " + err.Error())
 			return

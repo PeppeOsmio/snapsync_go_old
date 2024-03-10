@@ -33,12 +33,11 @@ type SnapshotDir struct {
 type SnapshotInfo struct {
 	Abspath      string
 	SnapshotName string
-	Interval     string
 	Number       int
 }
 
 func (snapshotInfo *SnapshotInfo) CompactName() string {
-	return fmt.Sprintf("%s.%s.%d", snapshotInfo.SnapshotName, snapshotInfo.Interval, snapshotInfo.Number)
+	return fmt.Sprintf("%s.%d", snapshotInfo.SnapshotName, snapshotInfo.Number)
 }
 
 func (snapshotInfo *SnapshotInfo) Size() (size int64, err error) {

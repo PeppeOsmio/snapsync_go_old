@@ -61,6 +61,16 @@ func LoadSnapshotsConfigs(configsDir string, expandVars bool) (snapshotsConfigs 
 		}
 		snapshotsConfigs = append(snapshotsConfigs, &snapshotConfig)
 	}
+	for i, snapshotConfig := range snapshotsConfigs {
+		for j, sc := range snapshotsConfigs {
+			if i == j {
+				continue
+			}
+			if snapshotConfig.SnapshotName == sc.SnapshotName {
+				return nil, fmt.Errorf("there are two snapshot configs with the same snapshot name: %s", sc.SnapshotName)
+			}
+		}
+	}
 	return snapshotsConfigs, nil
 }
 

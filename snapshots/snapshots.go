@@ -242,7 +242,7 @@ func GetSnapshotsInfo(configsDir string, expandVars bool, snapshotName string) (
 	return snapshotsInfo, nil
 }
 
-func RestoreSnapshot(config *structs.Config, interval string, number int, snapshotConfig *structs.SnapshotConfig) (err error) {
+func RestoreSnapshot(config *structs.Config, number int, snapshotConfig *structs.SnapshotConfig) (err error) {
 	snapshotLogPrefix := fmt.Sprintf("[%s]", snapshotConfig.SnapshotName)
 	for _, dir := range snapshotConfig.Dirs {
 		err = os.MkdirAll(dir.SrcDirAbspath, 0700)
@@ -250,7 +250,7 @@ func RestoreSnapshot(config *structs.Config, interval string, number int, snapsh
 			return fmt.Errorf("can't create directory %s: %s", dir.SrcDirAbspath, err.Error())
 		}
 
-		snapshottedDirPath := path.Join(snapshotConfig.SnapshotsDir, fmt.Sprintf("%s.%s.%d", snapshotConfig.SnapshotName, interval, number), dir.DstDirInSnapshot)
+		snapshottedDirPath := path.Join(snapshotConfig.SnapshotsDir, fmt.Sprintf("%s.%d", snapshotConfig.SnapshotName, number), dir.DstDirInSnapshot)
 		rsyncCommand := getRsyncDirsCommand(config, snapshottedDirPath, dir.SrcDirAbspath, nil)
 		slog.Debug(rsyncCommand)
 		_, err = exec.Command("sh", "-c", rsyncCommand).Output()

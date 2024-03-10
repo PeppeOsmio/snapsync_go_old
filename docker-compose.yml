@@ -5,4 +5,4 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /:/hostfs
-      - $SNAPSYNC_CONFIGS_DIR:/snapsync/configs
+      - $SNAPSYNC_CONFIGS_DIR:/configs/snapsync

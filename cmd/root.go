@@ -35,6 +35,12 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
+		runOnce, err := cmd.Flags().GetStringArray("run-once")
+		if err != nil {
+			slog.Error(fmt.Sprintf("can't get run-once flag: %s", err.Error()))
+			return
+		}
+
 		snapshotsConfigs, err := configs.LoadSnapshotsConfigs(configsDir, expandVars)
 		if err != nil {
 			slog.Error("Can't get snapshots configs in " + configsDir + ": " + err.Error())
@@ -46,40 +52,50 @@ var rootCmd = &cobra.Command{
 				slog.Error(fmt.Sprintf("[%s] can't execute snapshot: %s", snapshotConfig.SnapshotName, err.Error()))
 			}
 		}
+
+		if len(runOnce) > 0 {
+			for _, snapshotToRun := range runOnce {
+				var sc *structs.SnapshotConfig
+				for _, snapshotConfig := range snapshotsConfigs {
+					if snapshotToRun == snapshotConfig.SnapshotName {
+						sc = snapshotConfig
+						break
+					}
+				}
+				snapshotTask(sc)
+			}
+			return
+		}
+
 		snapshotsConfigsToSchedule := []*structs.SnapshotConfig{}
 		for _, snapshotConfig := range snapshotsConfigs {
-
-			if len(snapshotConfig.Cron) > 0 {
-				snapshotsConfigsToSchedule = append(snapshotsConfigsToSchedule, snapshotConfig)
-
-			} else {
-				snapshotTask(snapshotConfig)
+			if len(snapshotConfig.Cron) == 0 {
+				continue
 			}
+			snapshotsConfigsToSchedule = append(snapshotsConfigsToSchedule, snapshotConfig)
 		}
-		if len(snapshotsConfigsToSchedule) > 0 {
-			scheduler, err := gocron.NewScheduler()
-			for _, snapshotConfig := range snapshotsConfigsToSchedule {
-				_, err := scheduler.NewJob(
-					gocron.CronJob(snapshotConfig.Cron, false),
-					gocron.NewTask(
-						snapshotTask,
-						snapshotConfig,
-					),
-				)
-				if err != nil {
-					slog.Error("Can't add cron job for snapshot " + snapshotConfig.SnapshotName + ". Cron string is " + snapshotConfig.Cron)
-					return
-				}
-				slog.Info(fmt.Sprintf("[%s] scheduled with cron %s", snapshotConfig.SnapshotName, snapshotConfig.Cron))
-			}
+		scheduler, err := gocron.NewScheduler()
+		for _, snapshotConfig := range snapshotsConfigsToSchedule {
+			_, err := scheduler.NewJob(
+				gocron.CronJob(snapshotConfig.Cron, false),
+				gocron.NewTask(
+					snapshotTask,
+					snapshotConfig,
+				),
+			)
 			if err != nil {
-				slog.Error("can't create scheduler.")
+				slog.Error("Can't add cron job for snapshot " + snapshotConfig.SnapshotName + ". Cron string is " + snapshotConfig.Cron)
 				return
 			}
-			scheduler.Start()
-			for {
-				time.Sleep(1 * time.Second)
-			}
+			slog.Info(fmt.Sprintf("[%s] scheduled with cron %s", snapshotConfig.SnapshotName, snapshotConfig.Cron))
+		}
+		if err != nil {
+			slog.Error("can't create scheduler.")
+			return
+		}
+		scheduler.Start()
+		for {
+			time.Sleep(1 * time.Second)
 		}
 	},
 }
@@ -99,4 +115,5 @@ func init() {
 	}
 	rootCmd.PersistentFlags().String("configs-dir", defaultConfigsPath, "Directory where the configs are stored")
 	rootCmd.PersistentFlags().Bool("expand-vars", true, "Expand env variables in the config files")
+	rootCmd.Flags().StringArray("run-once", []string{}, "Run these snapshots once")
 }
