@@ -23,7 +23,7 @@ func HumanReadableSize(bytes int64) string {
 
 func GetInfoFromSnapshotBasePath(snapshotPath string) (snapshotName string, number int, err error) {
 	items := strings.Split(snapshotPath, ".")
-	if len(items) != 3 {
+	if len(items) != 2 {
 		return snapshotName, number, fmt.Errorf("snapshot name must be in format <name>.<interval>.<number>")
 	}
 	snapshotName = items[0]

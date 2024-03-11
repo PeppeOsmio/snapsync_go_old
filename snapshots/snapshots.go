@@ -34,7 +34,6 @@ func GetSnapshotDirName(snapshotName string, number int) string {
 }
 
 func executeOnlySnapshot(config *structs.Config, snapshotConfig *structs.SnapshotConfig) error {
-	fmt.Printf("Starting snapshot %s\n", snapshotConfig.SnapshotName)
 	snapshotLogPrefix := fmt.Sprintf("[%s]", snapshotConfig.SnapshotName)
 	before := time.Now().UnixMilli()
 	newestSnapshotPath := path.Join(snapshotConfig.SnapshotsDir, GetSnapshotDirName(snapshotConfig.SnapshotName, 0))
@@ -56,9 +55,9 @@ func executeOnlySnapshot(config *structs.Config, snapshotConfig *structs.Snapsho
 		slog.Debug(fmt.Sprintf("%s copying latest snapshot...", snapshotLogPrefix))
 		cpCommand := fmt.Sprintf("%s -lra %s/./ %s", config.CpPath, newestSnapshotPath, tmpDir)
 		slog.Debug(fmt.Sprintf("%s running %s", snapshotLogPrefix, cpCommand))
-		_, cpErr := exec.Command("sh", "-c", cpCommand).Output()
+		rsyncOutput, cpErr := exec.Command("sh", "-c", cpCommand).CombinedOutput()
 		if cpErr != nil {
-			return fmt.Errorf("%s error copying last snapshot %s to %s: %s", snapshotLogPrefix, newestSnapshotPath, tmpDir, cpErr.Error())
+			return fmt.Errorf("%s error copying last snapshot %s to %s: %s, %s", snapshotLogPrefix, newestSnapshotPath, tmpDir, cpErr.Error(), string(rsyncOutput))
 		}
 	} else if os.IsNotExist(err) {
 		slog.Debug(fmt.Sprintf("%s creating first snapshot %s", snapshotLogPrefix, newestSnapshotPath))
@@ -69,7 +68,6 @@ func executeOnlySnapshot(config *structs.Config, snapshotConfig *structs.Snapsho
 	os.Chtimes(tmpDir, now, now)
 
 	for _, dirToSnapshot := range snapshotConfig.Dirs {
-		slog.Debug(fmt.Sprintf("Trying to snapshot %s", dirToSnapshot.SrcDirAbspath))
 		_, err = os.Stat(dirToSnapshot.SrcDirAbspath)
 		if os.IsNotExist(err) {
 			slog.Warn(fmt.Sprintf("%s source directory %s does not exist", snapshotLogPrefix, dirToSnapshot.SrcDirAbspath))

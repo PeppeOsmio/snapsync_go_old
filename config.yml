@@ -1,4 +1,4 @@
 log_level: error
-cp_path: /usr/bin/cp
+cp_path: /bin/cp
 rsync_path: /usr/bin/rsync
 snapshots_configs_dir: ./snapshots_configs
