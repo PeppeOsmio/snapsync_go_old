@@ -42,7 +42,7 @@ var restoreCmd = &cobra.Command{
 			return
 		}
 
-		snapshotConfig, err := configs.GetSnapshotConfigByName(configsDir, expandVars, snapshotName)
+		snapshotConfig, err := configs.GetSnapshotConfigByName(config.SnapshotsConfigsDir, expandVars, snapshotName)
 		if err != nil {
 			slog.Error("An error occurred: " + err.Error())
 			return

@@ -9,6 +9,7 @@ FROM alpine:3.19
 
 COPY --from=build /snapsync/snapsync /snapsync/snapsync
 COPY --from=build /snapsync/entrypoint.sh /snapsync/entrypoint.sh
+COPY --from=build /snapsync/config.yml /snapsync/config.yml
 
 WORKDIR /snapsync
 

@@ -7,16 +7,16 @@ import (
 )
 
 type Config struct {
-	LogLevel  string `yaml:"log_level"`
-	CpPath    string `yaml:"cp_path"`
-	RSyncPath string `yaml:"rsync_path"`
+	LogLevel            string `yaml:"log_level"`
+	CpPath              string `yaml:"cp_path"`
+	RSyncPath           string `yaml:"rsync_path"`
+	SnapshotsConfigsDir string `yaml:"snapshots_configs_dir"`
 }
 
 type SnapshotConfig struct {
 	SnapshotName                  string        `yaml:"snapshot_name"`
 	Dirs                          []SnapshotDir `yaml:"dirs"`
 	SnapshotsDir                  string        `yaml:"snapshots_dir"`
-	Interval                      string        `yaml:"interval"`
 	Retention                     int           `yaml:"retention"`
 	Cron                          string        `yaml:"cron"`
 	AlwaysRunPostSnapshotCommands bool          `yaml:"always_run_post_snapshot_commands"`

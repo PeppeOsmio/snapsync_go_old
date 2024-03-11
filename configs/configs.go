@@ -28,10 +28,10 @@ func LoadConfig(configsDir string, expandVars bool) (config *structs.Config, err
 	return config, nil
 }
 
-func LoadSnapshotsConfigs(configsDir string, expandVars bool) (snapshotsConfigs []*structs.SnapshotConfig, err error) {
-	snapshotConfigsEntries, err := os.ReadDir(configsDir)
+func LoadSnapshotsConfigs(snapshotsConfigsDir string, expandVars bool) (snapshotsConfigs []*structs.SnapshotConfig, err error) {
+	snapshotConfigsEntries, err := os.ReadDir(snapshotsConfigsDir)
 	if err != nil {
-		return snapshotsConfigs, fmt.Errorf("can't read directory %s: %s", configsDir, err.Error())
+		return snapshotsConfigs, fmt.Errorf("can't read directory %s: %s", snapshotsConfigsDir, err.Error())
 	}
 	for _, snapshotConfigEntry := range snapshotConfigsEntries {
 		if strings.HasPrefix(snapshotConfigEntry.Name(), "config.yml") {
@@ -40,7 +40,7 @@ func LoadSnapshotsConfigs(configsDir string, expandVars bool) (snapshotsConfigs 
 		if !strings.HasSuffix(snapshotConfigEntry.Name(), ".yml") {
 			continue
 		}
-		absPath := path.Join(configsDir, snapshotConfigEntry.Name())
+		absPath := path.Join(snapshotsConfigsDir, snapshotConfigEntry.Name())
 		snapshotConfigFile, err := os.ReadFile(absPath)
 		if err != nil {
 			return snapshotsConfigs, fmt.Errorf("can't read snapshot config file %s: %s", absPath, err.Error())
@@ -78,23 +78,16 @@ func ValidateSnapshotConfig(snapshotConfig *structs.SnapshotConfig) error {
 	if strings.Contains(snapshotConfig.SnapshotName, ".") || strings.Contains(snapshotConfig.SnapshotName, " ") {
 		return fmt.Errorf("snapshot %s'sname must not include dots or whitespaces", snapshotConfig.SnapshotName)
 	}
-	if strings.Contains(snapshotConfig.Interval, ".") || strings.Contains(snapshotConfig.Interval, " ") {
-		return fmt.Errorf("snapshot %s's interval must not include dots or a whitespaces", snapshotConfig.SnapshotName)
-	}
 	return nil
 }
 
-func GetDefaultConfigsDir() (configsDir string, err error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("can't get user's home directory: %s", err.Error())
-	}
-	configsDir = path.Join(homeDir, ".config/snapsync")
-	return configsDir, nil
+func GetDefaultConfigsDir() string {
+	result, _ := os.Getwd()
+	return result
 }
 
-func GetSnapshotConfigByName(configsDir string, expandVars bool, snapshotName string) (*structs.SnapshotConfig, error) {
-	snapshotConfigs, err := LoadSnapshotsConfigs(configsDir, expandVars)
+func GetSnapshotConfigByName(snapshotsConfigsDir string, expandVars bool, snapshotName string) (*structs.SnapshotConfig, error) {
+	snapshotConfigs, err := LoadSnapshotsConfigs(snapshotsConfigsDir, expandVars)
 	if err != nil {
 		return nil, err
 	}

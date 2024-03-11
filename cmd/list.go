@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"log/slog"
+	"snapsync/configs"
 	"snapsync/snapshots"
 	"snapsync/utils"
 
@@ -27,8 +28,13 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			slog.Error("can 't get expand-vars flag")
 		}
+		config, err := configs.LoadConfig(configsDir, expandVars)
+		if err != nil {
+			slog.Error("can't get " + configsDir + ": " + err.Error())
+			return
+		}
 		snapshotToList := args[0]
-		snapshotsInfo, err := snapshots.GetSnapshotsInfo(configsDir, expandVars, snapshotToList)
+		snapshotsInfo, err := snapshots.GetSnapshotsInfo(config.SnapshotsConfigsDir, expandVars, snapshotToList)
 		if err != nil {
 			slog.Error("Can't get snapshots of snapshot " + snapshotToList + ": " + err.Error())
 			return

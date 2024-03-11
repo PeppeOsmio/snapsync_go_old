@@ -21,13 +21,15 @@ var rootCmd = &cobra.Command{
 	Short: "Snapsync is tool that performs snapshots of directories using rsync and hard links to use less space.",
 	Long:  `Snapsync is tool that performs snapshots of directories using rsync and hard links to use less space.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		configsDir, err := cmd.Flags().GetString("configs-dir")
+		configsDir, err := cmd.Flags().GetString("config-dir")
 		if err != nil {
-			slog.Error("can 't get configs-dir flag")
+			slog.Error("can't get config-dir flag")
+			return
 		}
 		expandVars, err := cmd.Flags().GetBool("expand-vars")
 		if err != nil {
-			slog.Error("can 't get expand-vars flag")
+			slog.Error("can't get expand-vars flag")
+			return
 		}
 		config, err := configs.LoadConfig(configsDir, expandVars)
 		if err != nil {
@@ -41,7 +43,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		snapshotsConfigs, err := configs.LoadSnapshotsConfigs(configsDir, expandVars)
+		snapshotsConfigs, err := configs.LoadSnapshotsConfigs(config.SnapshotsConfigsDir, expandVars)
 		if err != nil {
 			slog.Error("Can't get snapshots configs in " + configsDir + ": " + err.Error())
 		}
@@ -49,7 +51,7 @@ var rootCmd = &cobra.Command{
 		snapshotTask := func(snapshotConfig *structs.SnapshotConfig) {
 			snapshotErr := snapshots.ExecuteSnapshot(config, snapshotConfig)
 			if snapshotErr != nil {
-				slog.Error(fmt.Sprintf("[%s] can't execute snapshot: %s", snapshotConfig.SnapshotName, err.Error()))
+				slog.Error(fmt.Sprintf("[%s] can't execute snapshot: %s", snapshotConfig.SnapshotName, snapshotErr.Error()))
 			}
 		}
 
@@ -62,7 +64,11 @@ var rootCmd = &cobra.Command{
 						break
 					}
 				}
-				snapshotTask(sc)
+				if sc != nil {
+					snapshotTask(sc)
+				} else {
+					slog.Error(fmt.Sprintf("there is not snapshot named %s", runOnce))
+				}
 			}
 			return
 		}
@@ -108,12 +114,7 @@ func Execute() {
 }
 
 func init() {
-	defaultConfigsPath, err := configs.GetDefaultConfigsDir()
-	if err != nil {
-		slog.Error("Can't get default config path: " + err.Error())
-		return
-	}
-	rootCmd.PersistentFlags().String("configs-dir", defaultConfigsPath, "Directory where the configs are stored")
+	rootCmd.PersistentFlags().String("config-dir", configs.GetDefaultConfigsDir(), "Directory where config.yml is stored")
 	rootCmd.PersistentFlags().Bool("expand-vars", true, "Expand env variables in the config files")
 	rootCmd.Flags().StringArray("run-once", []string{}, "Run these snapshots once")
 }

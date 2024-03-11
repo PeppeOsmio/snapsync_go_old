@@ -1,3 +1,0 @@
-log_level: error
-cp_path: /usr/bin/cp
-rsync_path: /usr/bin/rsync

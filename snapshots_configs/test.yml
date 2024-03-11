@@ -1,0 +1,8 @@
+snapshot_name: test_daily
+dirs:
+  - src_dir_abspath: /hostfs/home/peppeosmio/Progetti/snapsync_go/test
+    dst_dir_in_snapshot: test
+snapshots_dir: /hostfs/home/peppeosmio/Progetti/snapsync_go/ss
+retention: 7
+always_run_post_snapshot_commands: true
+cron: "* * * * *"

@@ -2,6 +2,6 @@
 Dockerfile
 docker-compose.yml
 ss
-ss_configs
 test
 snapsync
+snapshots_configs
