@@ -1,5 +1,6 @@
 services:
   snapsync:
+    container_name: snapsync
     build:
       context: .
       dockerfile: Dockerfile

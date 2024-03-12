@@ -20,13 +20,15 @@ var restoreCmd = &cobra.Command{
 	Long:  `Restore a snapshot`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		configsDir, err := cmd.Flags().GetString("configs-dir")
+		configsDir, err := cmd.Flags().GetString("config-dir")
 		if err != nil {
 			slog.Error("can 't get configs-dir flag")
+			return
 		}
 		expandVars, err := cmd.Flags().GetBool("expand-vars")
 		if err != nil {
 			slog.Error("can 't get expand-vars flag")
+			return
 		}
 		config, err := configs.LoadConfig(configsDir, expandVars)
 		if err != nil {
