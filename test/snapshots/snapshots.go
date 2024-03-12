@@ -143,7 +143,6 @@ func executeOnlySnapshot(config *structs.Config, snapshotConfig *structs.Snapsho
 		if snapshotInfo.Number >= snapshotConfig.Retention {
 			snapshotToRemoveName := GetSnapshotDirName(snapshotConfig.SnapshotName, snapshotInfo.Number)
 			snapshotToRemovePath := path.Join(snapshotConfig.SnapshotsDir, snapshotToRemoveName)
-			slog.Debug(fmt.Sprintf("removing %s", snapshotToRemovePath))
 			err = os.RemoveAll(snapshotToRemovePath)
 			if err != nil {
 				return fmt.Errorf("%s can't remove snapshot %s: %s", snapshotLogPrefix, snapshotToRemovePath, err.Error())
